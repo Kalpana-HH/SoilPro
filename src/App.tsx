@@ -4,6 +4,8 @@ import {
   Thermometer, 
   Droplets, 
   MapPin, 
+  Map as MapIcon,
+  Eye,
   RefreshCw, 
   TrendingUp, 
   TrendingDown,
@@ -132,27 +134,23 @@ const validateValue = (val: any, isEnvironmental = false) => {
 
 const Gauge = ({ label, value, color, icon: Icon, delay = 0 }: { label: string, value: number | undefined, color: string, icon: any, delay?: number }) => (
   <motion.div 
-    initial={{ opacity: 0, x: -20 }}
+    initial={{ opacity: 0, x: -10 }}
     animate={{ opacity: 1, x: 0 }}
     transition={{ delay }}
-    className="space-y-4"
+    className="space-y-2"
   >
     <div className="flex justify-between items-end">
-      <div className="flex flex-col gap-1">
-        <span className="serif-header">{label}</span>
-        <div className="flex items-center gap-2">
-          <Icon size={14} className={`${color} opacity-60`} />
-          <span className="tech-label text-slate-400">Telemetry Stream</span>
-        </div>
+      <div className="flex flex-col">
+        <span className="tech-label opacity-40">{label}</span>
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="data-value text-2xl font-bold">
+        <span className="data-value text-lg">
           {value !== undefined ? value.toFixed(1) : '---'}
         </span>
-        <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">mg/kg</span>
+        <span className="text-[7px] text-slate-600 font-bold uppercase tracking-widest">mg/kg</span>
       </div>
     </div>
-    <div className="h-1 bg-slate-800/80 rounded-full overflow-hidden relative">
+    <div className="h-0.5 bg-white/5 rounded-full overflow-hidden relative">
       <motion.div 
         initial={{ width: 0 }}
         animate={{ width: `${Math.min(value || 0, 100)}%` }}
@@ -163,49 +161,38 @@ const Gauge = ({ label, value, color, icon: Icon, delay = 0 }: { label: string, 
   </motion.div>
 );
 
-const SensorCard = ({ title, value, unit, icon: Icon, trend, color, delay = 0 }: any) => (
+const SensorCard = ({ title, value, unit, icon: Icon, trend, color, delay = 0, className = "" }: any) => (
   <motion.div 
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
+    initial={{ opacity: 0, scale: 0.98 }}
+    animate={{ opacity: 1, scale: 1 }}
     transition={{ delay }}
-    className="glass-card p-8 group relative flex flex-col justify-between min-h-[180px]"
+    className={`glass-card p-5 group relative flex flex-col justify-between ${className}`}
   >
-    <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-      <Icon size={64} className={color} />
+    <div className="flex justify-between items-start">
+      <div className="space-y-0.5">
+        <span className="tech-label opacity-40">{title}</span>
+        <div className="flex items-center gap-1.5">
+          <div className={`w-1 h-1 rounded-full ${color.replace('text-', 'bg-')} opacity-40`} />
+          <span className="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Active</span>
+        </div>
+      </div>
+      <Icon size={14} className={`${color} opacity-20 group-hover:opacity-40 transition-opacity`} />
     </div>
     
     <div className="space-y-1">
-      <span className="serif-header">{title}</span>
-      <div className="flex items-center gap-2">
-        <div className={`w-1.5 h-1.5 rounded-full ${color.replace('text-', 'bg-')} opacity-50`} />
-        <span className="tech-label">Active Sensor</span>
-      </div>
-    </div>
-    
-    <div className="space-y-2">
-      <div className="flex items-baseline gap-2">
-        <h3 className="text-5xl font-black data-value">
+      <div className="flex items-baseline gap-1.5">
+        <h3 className="text-3xl font-bold data-value tracking-tighter">
           {value !== undefined && value !== null ? value.toFixed(1) : '---'}
         </h3>
-        <span className="text-xs text-slate-500 font-bold uppercase tracking-[0.2em]">{unit}</span>
+        <span className="text-[8px] text-slate-600 font-bold uppercase tracking-widest">{unit}</span>
       </div>
       
-      <AnimatePresence mode="wait">
-        {trend !== undefined && (
-          <motion.div 
-            key={trend}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.15em] ${trend >= 0 ? 'text-emerald-500/80' : 'text-rose-500/80'}`}
-          >
-            <div className={`p-1 rounded-sm ${trend >= 0 ? 'bg-emerald-500/10' : 'bg-rose-500/10'}`}>
-              {trend >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-            </div>
-            <span>{Math.abs(trend ?? 0).toFixed(1)}% Variance</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {trend !== undefined && (
+        <div className={`flex items-center gap-1 text-[8px] font-bold uppercase tracking-tighter ${trend >= 0 ? 'text-emerald-500/60' : 'text-rose-500/60'}`}>
+          {trend >= 0 ? <TrendingUp size={8} /> : <TrendingDown size={8} />}
+          <span>{Math.abs(trend ?? 0).toFixed(1)}% variance</span>
+        </div>
+      )}
     </div>
   </motion.div>
 );
@@ -814,41 +801,41 @@ export default function App() {
 
         {/* Main Content */}
         <main className="flex-grow overflow-y-auto relative">
-          <header className={`sticky top-0 z-40 px-10 py-6 border-b backdrop-blur-md flex items-center justify-between ${nightVision ? 'bg-black/80 border-rose-900/30' : 'bg-[#020617]/80 border-slate-800/50'}`}>
-            <div className="flex items-center gap-8">
+          <header className={`sticky top-0 z-40 px-4 lg:px-10 py-4 lg:py-6 border-b backdrop-blur-md flex items-center justify-between ${nightVision ? 'bg-black/80 border-rose-900/30' : 'bg-[#020617]/80 border-slate-800/50'}`}>
+            <div className="flex items-center gap-4 lg:gap-8">
               {!sidebarOpen && (
                 <motion.button
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   onClick={() => setSidebarOpen(true)}
-                  className={`p-2.5 rounded-xl border transition-all ${nightVision ? 'bg-rose-950/20 border-rose-900/50 text-rose-400' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/50'}`}
+                  className={`p-2 rounded-xl border transition-all ${nightVision ? 'bg-rose-950/20 border-rose-900/50 text-rose-400' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/50'}`}
                 >
-                  <Menu size={20} />
+                  <Menu size={18} />
                 </motion.button>
               )}
-              <div className="flex flex-col gap-0.5">
-                <span className="serif-header">Operational Sector</span>
-                <span className="text-sm font-bold text-slate-100 uppercase tracking-widest">Alpha-7 Field</span>
+              <div className="hidden sm:flex flex-col gap-0.5">
+                <span className="tech-label opacity-40">Sector</span>
+                <span className="text-[10px] lg:text-sm font-bold text-slate-100 uppercase tracking-widest">Alpha-7</span>
               </div>
-              <div className="w-px h-8 bg-slate-800/50" />
-              <div className="flex flex-col gap-0.5">
-                <span className="serif-header">Telemetry Source</span>
-                <span className={`text-xs font-bold ${data?.source?.includes('Live') ? 'text-emerald-400' : 'text-amber-400'}`}>
+              <div className="hidden md:block w-px h-8 bg-slate-800/50" />
+              <div className="hidden md:flex flex-col gap-0.5">
+                <span className="tech-label opacity-40">Source</span>
+                <span className={`text-[10px] font-bold ${data?.source?.includes('Live') ? 'text-emerald-400' : 'text-amber-400'}`}>
                   {data?.source || 'Simulated'}
                 </span>
               </div>
               <div className="w-px h-8 bg-slate-800/50" />
               <div className="flex flex-col gap-0.5">
-                <span className="serif-header">Last Synchronization</span>
-                <span className="text-xs font-bold text-blue-400">
+                <span className="tech-label opacity-40">Sync</span>
+                <span className="text-[10px] lg:text-xs font-bold text-blue-400">
                   {data?.timestamp ? new Date(data.timestamp).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }) : '---'}
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col items-end mr-4">
-                <span className="tech-label text-[8px]">Environment</span>
+            <div className="flex items-center gap-3 lg:gap-4">
+              <div className="hidden lg:flex flex-col items-end mr-2">
+                <span className="tech-label opacity-40">Environment</span>
                 <span className="font-mono text-[10px] font-bold text-slate-400">
                   {window.location.hostname.includes('ais-pre') ? 'PRODUCTION' : 'DEVELOPMENT'}
                 </span>
@@ -856,214 +843,140 @@ export default function App() {
               <motion.button 
                 whileTap={{ scale: 0.95 }}
                 onClick={fetchFallbackData}
-                className={`p-2.5 rounded-xl border transition-all ${nightVision ? 'bg-rose-950/20 border-rose-900/50 text-rose-400' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/50'}`}
+                className={`p-2 lg:p-2.5 rounded-xl border transition-all ${nightVision ? 'bg-rose-950/20 border-rose-900/50 text-rose-400' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/50'}`}
               >
-                <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+                <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               </motion.button>
             </div>
           </header>
 
-          <div className="p-10 max-w-[1400px] mx-auto">
+          <div className="p-4 lg:p-8 max-w-[1600px] mx-auto h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar">
             <AnimatePresence mode="wait">
-        {activeTab === 'overview' ? (
-          <motion.div 
-            key="overview"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="grid grid-cols-1 xl:grid-cols-12 gap-8"
-          >
-            <div className="xl:col-span-8 space-y-8">
-              <div className="glass-card p-10 relative group">
-                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-emerald-500 to-blue-500 opacity-50" />
-                
-                <div className="flex items-center justify-between mb-12">
-                  <div className="flex flex-col gap-1">
-                    <span className="serif-header">Soil Composition Analysis</span>
-                    <div className="flex items-center gap-3">
-                      <Layers className="text-blue-400 opacity-60" size={20} />
-                      <h2 className="text-xl font-bold text-slate-100 uppercase tracking-widest">Nutrient Profile</h2>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="flex flex-col items-end">
-                      <span className="tech-label text-[8px]">Sector</span>
-                      <span className="text-[10px] font-bold text-slate-400">ALPHA-7</span>
-                    </div>
-                    <div className="w-px h-8 bg-slate-800" />
-                    <div className="flex items-center gap-2 px-4 py-2 bg-slate-950/50 rounded-xl border border-slate-800/50 shadow-inner">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="tech-label text-[9px]">Live Stream</span>
-                    </div>
-                  </div>
+              {activeTab === 'overview' ? (
+                <motion.div 
+                  key="overview"
+                  initial={{ opacity: 0, scale: 0.99 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.99 }}
+                  className="bento-grid"
+                >
+            {/* Main Chart - Large Bento Box */}
+            <div className="xl:col-span-8 xl:row-span-3 glass-card p-5 flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <div className="space-y-0.5">
+                  <span className="tech-label opacity-40">Soil Composition Analysis</span>
+                  <h2 className="text-[10px] font-bold text-slate-100 uppercase tracking-widest">Nutrient Profile</h2>
                 </div>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                  <div className="h-[350px] w-full relative">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                        <defs>
-                          {chartData.map((entry, index) => (
-                            <linearGradient key={`grad-${index}`} id={`grad-${index}`} x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor={entry.color} stopOpacity={0.8}/>
-                              <stop offset="100%" stopColor={entry.color} stopOpacity={0.2}/>
-                            </linearGradient>
-                          ))}
-                        </defs>
-                        <CartesianGrid strokeDasharray="4 4" stroke="#1e293b" vertical={false} opacity={0.5} />
-                        <XAxis 
-                          dataKey="name" 
-                          stroke="#475569" 
-                          fontSize={10} 
-                          tickLine={false} 
-                          axisLine={false}
-                          dy={10}
-                          fontWeight="bold"
-                        />
-                        <YAxis 
-                          stroke="#475569" 
-                          fontSize={10} 
-                          tickLine={false} 
-                          axisLine={false}
-                          dx={-10}
-                          fontWeight="bold"
-                        />
-                        <Tooltip 
-                          cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              const data = payload[0].payload;
-                              return (
-                                <div className="glass-card p-4 border-slate-700 shadow-2xl">
-                                  <p className="tech-label mb-1">{data.full}</p>
-                                  <p className="text-xl font-mono font-black text-slate-100">{(data.value ?? 0).toFixed(2)} <span className="text-[10px] text-slate-500">mg/kg</span></p>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={60}>
-                          {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={`url(#grad-${index})`} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  <div className="flex flex-col justify-center space-y-10">
-                    <Gauge label="Nitrogen (N)" value={validateValue(data?.nitrogen)} color="text-emerald-400" icon={Wind} delay={0.1} />
-                    <Gauge label="Phosphorus (P)" value={validateValue(data?.phosphorus)} color="text-blue-400" icon={Droplets} delay={0.2} />
-                    <Gauge label="Potassium (K)" value={validateValue(data?.potassium)} color="text-amber-400" icon={Activity} delay={0.3} />
-                  </div>
+                <div className="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-lg border border-white/5">
+                  <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="tech-label text-[7px]">Live Stream</span>
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <SensorCard 
-                  title="Ambient Temperature" 
-                  value={weather.temp || validateValue(data?.temperature, true)} 
-                  unit="°C" 
-                  icon={Thermometer} 
-                  color="text-rose-400"
-                  trend={data && prevData ? calculateTrend(weather.temp || validateValue(data.temperature, true) || 0, validateValue(prevData.temperature, true) || 0) : undefined}
-                  delay={0.4}
-                />
-                <SensorCard 
-                  title="Soil Saturation" 
-                  value={validateValue(data?.humidity, true)} 
-                  unit="%" 
-                  icon={Droplets} 
-                  color="text-blue-400"
-                  trend={data && prevData ? calculateTrend(validateValue(data.humidity, true) || 0, validateValue(prevData.humidity, true) || 0) : undefined}
-                  delay={0.5}
-                />
-              </div>
-
-              <div className="glass-card p-8 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-amber-500 opacity-50" />
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex flex-col gap-1">
-                    <span className="serif-header">Environmental Monitoring</span>
-                    <div className="flex items-center gap-3">
-                      <ShieldCheck className="text-amber-400 opacity-60" size={20} />
-                      <h2 className="text-xl font-bold text-slate-100 uppercase tracking-widest">Tactical Weather Intelligence</h2>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-slate-950/50 rounded-xl border border-slate-800/50">
-                    <MapPin size={14} className="text-slate-500" />
-                    <span className="tech-label text-[9px]">
-                      {location ? `${location.lat.toFixed(4)}°N, ${location.lng.toFixed(4)}°E` : 'ACQUIRING GPS...'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  <div className="lg:col-span-2 space-y-4">
-                    <h3 className="tech-label text-slate-400">Field Directives</h3>
-                    <div className="space-y-3">
-                      {tacticalAdvice.map((advice, i) => (
-                        <motion.div 
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          key={i} 
-                          className="flex items-start gap-3 p-4 rounded-xl bg-slate-900/50 border border-slate-800/50"
-                        >
-                          <div className={`mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0 ${advice.includes('Optimal') ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`} />
-                          <p className="text-sm text-slate-300 leading-relaxed">{advice}</p>
-                        </motion.div>
+              
+              <div className="flex-grow min-h-[200px] relative">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                    <defs>
+                      {chartData.map((entry, index) => (
+                        <linearGradient key={`grad-${index}`} id={`grad-${index}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={entry.color} stopOpacity={0.4}/>
+                          <stop offset="100%" stopColor={entry.color} stopOpacity={0.05}/>
+                        </linearGradient>
                       ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h3 className="tech-label text-slate-400">7-Day Outlook</h3>
-                    <div className="space-y-2">
-                      {forecast.slice(0, 5).map((day, i) => (
-                        <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-slate-950/30 border border-slate-900/50">
-                          <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">
-                            {new Date(day.date).toLocaleDateString([], { weekday: 'short' })}
-                          </span>
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1">
-                              <Droplets size={10} className="text-blue-500" />
-                              <span className="text-[10px] font-mono text-slate-400">{day.precip.toFixed(1)}mm</span>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" vertical={false} opacity={0.05} />
+                    <XAxis 
+                      dataKey="name" 
+                      stroke="#475569" 
+                      fontSize={7} 
+                      tickLine={false} 
+                      axisLine={false}
+                      dy={5}
+                    />
+                    <YAxis 
+                      stroke="#475569" 
+                      fontSize={7} 
+                      tickLine={false} 
+                      axisLine={false}
+                    />
+                    <Tooltip 
+                      cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="glass-card p-2 border-white/10 shadow-2xl">
+                              <p className="tech-label opacity-40 mb-0.5">{data.full}</p>
+                              <p className="text-sm font-mono font-bold text-slate-100">{(data.value ?? 0).toFixed(2)} <span className="text-[7px] text-slate-500">mg/kg</span></p>
                             </div>
-                            <span className="text-[10px] font-mono font-bold text-slate-200">{day.maxTemp.toFixed(0)}° / {day.minTemp.toFixed(0)}°</span>
-                          </div>
-                        </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar dataKey="value" radius={[3, 3, 0, 0]} barSize={30}>
+                      {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={`url(#grad-${index})`} />
                       ))}
-                    </div>
-                  </div>
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Nutrient Gauges - Side Bento Box */}
+            <div className="xl:col-span-4 xl:row-span-3 glass-card p-5 flex flex-col justify-between">
+              <div className="space-y-0.5 mb-4">
+                <span className="tech-label opacity-40">Real-time Telemetry</span>
+                <h2 className="text-[10px] font-bold text-slate-100 uppercase tracking-widest">Macro Nutrients</h2>
+              </div>
+              <div className="space-y-4">
+                <Gauge label="Nitrogen (N)" value={validateValue(data?.nitrogen)} color="text-emerald-400" icon={Wind} delay={0.1} />
+                <Gauge label="Phosphorus (P)" value={validateValue(data?.phosphorus)} color="text-blue-400" icon={Droplets} delay={0.2} />
+                <Gauge label="Potassium (K)" value={validateValue(data?.potassium)} color="text-amber-400" icon={Activity} delay={0.3} />
+              </div>
+            </div>
+
+            {/* Weather Intelligence - Wide Bento Box */}
+            <div className="xl:col-span-8 xl:row-span-3 glass-card p-5 relative overflow-hidden">
+              <div className="flex items-center justify-between mb-4">
+                <div className="space-y-0.5">
+                  <span className="tech-label opacity-40">Environmental Monitoring</span>
+                  <h2 className="text-[10px] font-bold text-slate-100 uppercase tracking-widest">Tactical Weather</h2>
+                </div>
+                <div className="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-lg border border-white/5">
+                  <MapPin size={10} className="text-slate-500" />
+                  <span className="tech-label text-[7px]">
+                    {location ? `${location.lat.toFixed(2)}°N, ${location.lng.toFixed(2)}°E` : 'GPS...'}
+                  </span>
                 </div>
               </div>
 
-              <div className="glass-card p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-3">
-                    <Sprout className="text-emerald-400" size={20} />
-                    <h2 className="text-lg font-bold text-slate-100 uppercase tracking-widest">Growth Cycle</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <span className="tech-label opacity-30">Field Directives</span>
+                  <div className="space-y-1.5">
+                    {tacticalAdvice.slice(0, 3).map((advice, i) => (
+                      <div key={i} className="flex items-start gap-2 p-2.5 rounded-lg bg-white/2 border border-white/5">
+                        <div className={`mt-1 w-1 h-1 rounded-full flex-shrink-0 ${advice.includes('Optimal') ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`} />
+                        <p className="text-[10px] text-slate-400 leading-tight">{advice}</p>
+                      </div>
+                    ))}
                   </div>
-                  <span className="tech-label text-[10px] text-emerald-500">STAGE 3: VEGETATIVE</span>
                 </div>
-                <div className="relative pt-4 pb-8">
-                  <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-800 -translate-y-1/2" />
-                  <div className="flex justify-between relative z-10">
-                    {[
-                      { label: 'Germination', active: true },
-                      { label: 'Seedling', active: true },
-                      { label: 'Vegetative', active: true, current: true },
-                      { label: 'Flowering', active: false },
-                      { label: 'Harvest', active: false }
-                    ].map((stage, i) => (
-                      <div key={i} className="flex flex-col items-center gap-3">
-                        <div className={`w-4 h-4 rounded-full border-2 transition-all duration-500 ${
-                          stage.current ? 'bg-emerald-500 border-white scale-125 glow-emerald' : 
-                          stage.active ? 'bg-emerald-500 border-emerald-500' : 'bg-slate-900 border-slate-700'
-                        }`} />
-                        <span className={`tech-label text-[8px] ${stage.active ? 'text-slate-200' : 'text-slate-600'}`}>{stage.label}</span>
+
+                <div className="space-y-2">
+                  <span className="tech-label opacity-30">7-Day Outlook</span>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {forecast.slice(0, 5).map((day, i) => (
+                      <div key={i} className="flex flex-col items-center p-1.5 rounded-lg bg-white/2 border border-white/5">
+                        <span className="text-[6px] font-bold text-slate-500 uppercase mb-0.5">
+                          {new Date(day.date).toLocaleDateString([], { weekday: 'short' })}
+                        </span>
+                        <div className="flex flex-col items-center">
+                          <span className="text-[8px] font-bold text-slate-200">{day.maxTemp.toFixed(0)}°</span>
+                          <Droplets size={6} className="text-blue-500/50" />
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1071,64 +984,61 @@ export default function App() {
               </div>
             </div>
 
-            <div className="xl:col-span-4 space-y-8">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="glass-card p-6 flex flex-col items-center justify-center text-center gap-2">
-                  <div className="p-3 rounded-full bg-blue-500/10 text-blue-400">
-                    <Wind size={20} />
-                  </div>
-                  <div className="text-2xl font-black font-mono text-slate-100">{weather.temp}°C</div>
-                  <span className="tech-label text-[8px] uppercase tracking-widest">{weather.condition}</span>
+            {/* Environment Stats - Small Bento Boxes */}
+            <SensorCard 
+              className="xl:col-span-2 xl:row-span-2"
+              title="Ambient Temp" 
+              value={weather.temp || validateValue(data?.temperature, true)} 
+              unit="°C" 
+              icon={Thermometer} 
+              color="text-rose-400"
+              trend={data && prevData ? calculateTrend(weather.temp || validateValue(data.temperature, true) || 0, validateValue(prevData.temperature, true) || 0) : undefined}
+              delay={0.4}
+            />
+            <SensorCard 
+              className="xl:col-span-2 xl:row-span-2"
+              title="Soil Saturation" 
+              value={validateValue(data?.humidity, true)} 
+              unit="%" 
+              icon={Droplets} 
+              color="text-blue-400"
+              trend={data && prevData ? calculateTrend(validateValue(data.humidity, true) || 0, validateValue(prevData.humidity, true) || 0) : undefined}
+              delay={0.5}
+            />
+
+            {/* Growth Cycle - Long Bento Box */}
+            <div className="xl:col-span-4 xl:row-span-1 glass-card p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                  <Sprout className="text-emerald-500" size={14} />
                 </div>
-                <div className="glass-card p-6 flex flex-col items-center justify-center text-center gap-2">
-                  <div className="p-3 rounded-full bg-emerald-500/10 text-emerald-400">
-                    <TrendingUp size={20} />
-                  </div>
-                  <div className="text-2xl font-black font-mono text-slate-100">84%</div>
-                  <span className="tech-label text-[8px] uppercase tracking-widest">Yield Forecast</span>
+                <div className="flex flex-col">
+                  <span className="tech-label opacity-40">Growth Cycle</span>
+                  <span className="text-[9px] font-bold text-slate-200 uppercase tracking-widest">Vegetative Stage</span>
                 </div>
               </div>
-
-              <div className="glass-card p-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-5">
-                  <Target size={120} />
-                </div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <Target className="text-emerald-400" size={20} />
-                    <h2 className="text-lg font-bold text-slate-100 uppercase tracking-widest">Health Score</h2>
-                  </div>
-                </div>
-                <div className="flex flex-col items-center justify-center py-4">
-                  <div className="relative">
-                    <svg className="w-48 h-48 transform -rotate-90">
-                      <circle cx="96" cy="96" r="88" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-slate-800" />
-                      <motion.circle 
-                        cx="96" cy="96" r="88" stroke="currentColor" strokeWidth="12" fill="transparent" 
-                        strokeDasharray={553}
-                        initial={{ strokeDashoffset: 553 }}
-                        animate={{ strokeDashoffset: 553 - (553 * calculateHealthScore(data!)) / 100 }}
-                        className="text-emerald-500" 
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-5xl font-black font-mono text-slate-100">{calculateHealthScore(data!).toFixed(0)}</span>
-                      <span className="tech-label text-[10px] opacity-50">OPTIMAL</span>
-                    </div>
-                  </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[8px] font-bold text-emerald-500/60">Day 42</span>
+                <div className="w-10 h-0.5 bg-white/5 rounded-full overflow-hidden">
+                  <div className="w-2/3 h-full bg-emerald-500" />
                 </div>
               </div>
+            </div>
 
-              <div className="glass-card p-8 flex flex-col h-full">
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-3">
-                    <MapPin className="text-emerald-400" size={20} />
-                    <h2 className="text-lg font-bold text-slate-100 uppercase tracking-widest">Satellite View</h2>
-                  </div>
+            {/* Satellite View - Large Bento Box */}
+            <div className="xl:col-span-4 xl:row-span-3 glass-card p-5 flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <div className="space-y-0.5">
+                  <span className="tech-label opacity-40">Spatial Mapping</span>
+                  <h2 className="text-[10px] font-bold text-slate-100 uppercase tracking-widest">Satellite View</h2>
                 </div>
-                <div className="flex-1 min-h-[300px] rounded-2xl overflow-hidden border border-slate-800/50 relative group">
-                  <div className="absolute inset-0 bg-[url('https://picsum.photos/seed/farm-satellite/800/600')] bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" />
-                  <div className="absolute inset-0 bg-emerald-500/10 mix-blend-overlay" />
+                <MapIcon size={12} className="text-slate-500" />
+              </div>
+              <div className="flex-grow rounded-lg overflow-hidden border border-white/5 relative group">
+                <div className="absolute inset-0 bg-[url('https://picsum.photos/seed/farm-satellite/800/600')] bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" />
+                <div className="absolute inset-0 bg-emerald-500/5 mix-blend-overlay" />
+                <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[6px] text-white/60 font-mono">
+                  ALPHA-7 SECTOR
                 </div>
               </div>
             </div>
@@ -1136,197 +1046,237 @@ export default function App() {
         ) : activeTab === 'history' ? (
           <motion.div 
             key="history"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-8"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            className="glass-card p-6"
           >
-            <div className="glass-card p-8">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                  <History className="text-blue-400" size={24} />
-                  <h2 className="text-lg font-bold text-slate-100 uppercase tracking-widest">Historical Readings</h2>
-                </div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="space-y-0.5">
+                <span className="tech-label opacity-40">Temporal Data</span>
+                <h2 className="text-[10px] font-bold text-slate-100 uppercase tracking-widest">Telemetry History</h2>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-800">
-                      <th className="py-4 px-4 serif-header">Timestamp</th>
-                      <th className="py-4 px-4 serif-header">Nitrogen</th>
-                      <th className="py-4 px-4 serif-header">Phosphorus</th>
-                      <th className="py-4 px-4 serif-header">Potassium</th>
-                      <th className="py-4 px-4 serif-header">Temp</th>
-                      <th className="py-4 px-4 serif-header">Humidity</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {history.length > 0 ? (
-                      history.map((record, i) => (
-                        <tr key={record.id || i} className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
-                          <td className="py-4 px-4 font-mono text-xs text-slate-400">{record.time || 'N/A'}</td>
-                          <td className="py-4 px-4 font-mono text-sm font-bold text-emerald-400">{record.nitrogen?.toFixed(1)}</td>
-                          <td className="py-4 px-4 font-mono text-sm font-bold text-blue-400">{record.phosphorus?.toFixed(1)}</td>
-                          <td className="py-4 px-4 font-mono text-sm font-bold text-amber-400">{record.potassium?.toFixed(1)}</td>
-                          <td className="py-4 px-4 font-mono text-sm text-rose-400">{record.temperature?.toFixed(1)}°C</td>
-                          <td className="py-4 px-4 font-mono text-sm text-blue-300">{record.humidity?.toFixed(1)}%</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={6} className="py-20 text-center">
-                          <div className="flex flex-col items-center gap-4 opacity-30">
-                            <Database size={48} />
-                            <p className="tech-label">No historical data found in telemetry logs.</p>
-                          </div>
-                        </td>
+              <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg border border-white/5">
+                <Database size={12} className="text-slate-500" />
+                <span className="tech-label text-[8px]">{history.length} Records</span>
+              </div>
+            </div>
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-white/5">
+                    <th className="py-3 px-4 tech-label opacity-40">Timestamp</th>
+                    <th className="py-3 px-4 tech-label opacity-40">N</th>
+                    <th className="py-3 px-4 tech-label opacity-40">P</th>
+                    <th className="py-3 px-4 tech-label opacity-40">K</th>
+                    <th className="py-3 px-4 tech-label opacity-40">Temp</th>
+                    <th className="py-3 px-4 tech-label opacity-40">Humid</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[11px] font-mono">
+                  {history.length > 0 ? (
+                    history.map((record, i) => (
+                      <tr key={record.id || i} className="border-b border-white/2 hover:bg-white/2 transition-colors">
+                        <td className="py-3 px-4 text-slate-500">{record.time || '---'}</td>
+                        <td className="py-3 px-4 text-emerald-400/60">{record.nitrogen?.toFixed(1)}</td>
+                        <td className="py-3 px-4 text-blue-400/60">{record.phosphorus?.toFixed(1)}</td>
+                        <td className="py-3 px-4 text-amber-400/60">{record.potassium?.toFixed(1)}</td>
+                        <td className="py-3 px-4 text-rose-400/60">{record.temperature?.toFixed(1)}°</td>
+                        <td className="py-3 px-4 text-blue-300/60">{record.humidity?.toFixed(1)}%</td>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="py-12 text-center tech-label opacity-20 italic">No historical data available in current sector</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </motion.div>
         ) : activeTab === 'intelligence' ? (
           <motion.div 
             key="intelligence"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-8"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-6"
           >
-            <div className="glass-card p-10 relative">
-              <div className="flex items-center justify-between mb-12">
-                <div className="flex flex-col gap-1">
-                  <span className="serif-header">Agronomic Intelligence Unit</span>
-                  <div className="flex items-center gap-3">
-                    <BrainCircuit className="text-emerald-400 opacity-60" size={20} />
-                    <h2 className="text-xl font-bold text-slate-100 uppercase tracking-widest">Soil Analysis Report</h2>
-                  </div>
+            <div className="lg:col-span-8 glass-card p-6 flex flex-col">
+              <div className="flex items-center justify-between mb-6">
+                <div className="space-y-1">
+                  <span className="tech-label opacity-40">Neural Analysis</span>
+                  <h2 className="text-sm font-bold text-slate-100 uppercase tracking-widest">AI Soil Intelligence</h2>
                 </div>
-                <button 
+                <motion.button 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={runAiAnalysis}
                   disabled={analyzing}
-                  className={`px-8 py-3 rounded-xl font-bold text-[10px] tracking-widest uppercase transition-all ${analyzing ? 'bg-slate-800 text-slate-500' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20'}`}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-400 tech-label hover:bg-emerald-500/20 transition-all disabled:opacity-50"
                 >
-                  {analyzing ? 'PROCESSING DATA...' : 'INITIATE ANALYSIS'}
-                </button>
+                  <Cpu size={14} className={analyzing ? 'animate-spin' : ''} />
+                  {analyzing ? 'Processing...' : 'Run Analysis'}
+                </motion.button>
               </div>
-              <div className="prose prose-invert max-w-none min-h-[400px] bg-slate-950/20 rounded-2xl p-10 border border-slate-800/30 shadow-inner">
+
+              <div className="flex-grow bg-black/20 rounded-xl border border-white/5 p-6 overflow-y-auto custom-scrollbar min-h-[400px]">
                 {aiAnalysis ? (
-                  <div className="markdown-body">
-                    <Markdown>{aiAnalysis}</Markdown>
+                  <div className="prose prose-invert prose-sm max-w-none">
+                    <div className="markdown-body">
+                      <Markdown>{aiAnalysis}</Markdown>
+                    </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-4 py-20">
-                    <BrainCircuit size={48} className="opacity-20" />
-                    <p className="tech-label text-center">Click "Run Analysis" to generate AI insights.</p>
+                  <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-20">
+                    <BrainCircuit size={48} />
+                    <p className="tech-label max-w-xs">Initialize neural analysis to generate tactical soil insights and growth projections</p>
                   </div>
                 )}
+              </div>
+            </div>
+
+            <div className="lg:col-span-4 space-y-6">
+              <div className="glass-card p-6">
+                <h3 className="tech-label opacity-40 mb-4">Analysis Parameters</h3>
+                <div className="space-y-3">
+                  {[
+                    { label: 'Model', value: 'Gemini 2.0 Flash' },
+                    { label: 'Context', value: 'Hyper-Local Weather' },
+                    { label: 'Data Points', value: '128-bit Telemetry' },
+                    { label: 'Confidence', value: '98.4%' }
+                  ].map((param, i) => (
+                    <div key={i} className="flex justify-between items-center py-2 border-b border-white/5">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase">{param.label}</span>
+                      <span className="text-[10px] font-mono text-slate-300">{param.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="glass-card p-6 bg-emerald-500/5 border-emerald-500/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <Zap size={16} className="text-emerald-400" />
+                  <h3 className="tech-label text-emerald-400">Tactical Recommendation</h3>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed italic">
+                  "Current Nitrogen levels are slightly below optimal for the vegetative stage. Consider a 15% increase in nutrient dosing over the next 48 hours."
+                </p>
               </div>
             </div>
           </motion.div>
         ) : activeTab === 'assistant' ? (
           <motion.div 
             key="assistant"
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            exit={{ opacity: 0, scale: 0.98 }}
             className="flex flex-col glass-card h-[600px] overflow-hidden"
           >
-            <div className="flex-grow overflow-y-auto p-8 space-y-8">
+            <div className="flex-grow overflow-y-auto p-6 space-y-6 custom-scrollbar">
               {chatMessages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] space-y-2 flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                    <span className="tech-label text-[8px] px-1">{msg.role === 'user' ? 'OPERATOR' : 'SOILGUARD AI'}</span>
-                    <div className={`p-5 rounded-2xl shadow-xl ${msg.role === 'user' ? 'bg-emerald-500/10 text-emerald-100 border border-emerald-500/20' : 'bg-slate-900/80 text-slate-200 border border-slate-800/50'}`}>
-                      <div className="markdown-body text-sm leading-relaxed">
+                  <div className={`max-w-[85%] space-y-1 flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                    <span className="tech-label opacity-30 px-1">{msg.role === 'user' ? 'OPERATOR' : 'SOILGUARD AI'}</span>
+                    <div className={`p-4 rounded-xl ${msg.role === 'user' ? 'bg-emerald-500/10 text-emerald-100 border border-emerald-500/20' : 'bg-white/5 text-slate-200 border border-white/5'}`}>
+                      <div className="markdown-body text-[11px] leading-relaxed">
                         <Markdown>{msg.text}</Markdown>
                       </div>
                     </div>
                   </div>
                 </div>
               ))}
+              {chatLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-white/5 p-4 rounded-xl border border-white/5 animate-pulse">
+                    <div className="flex gap-1">
+                      <div className="w-1 h-1 bg-slate-500 rounded-full animate-bounce" />
+                      <div className="w-1 h-1 bg-slate-500 rounded-full animate-bounce delay-75" />
+                      <div className="w-1 h-1 bg-slate-500 rounded-full animate-bounce delay-150" />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            <form onSubmit={handleSendMessage} className="p-6 bg-slate-950/80 border-t border-white/5 flex gap-4 backdrop-blur-md">
+            <form onSubmit={handleSendMessage} className="p-4 bg-black/20 border-t border-white/5 flex gap-3">
               <input 
                 type="text"
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Transmit query to SoilGuard AI..."
-                className="flex-grow bg-slate-900/50 border border-white/5 rounded-xl px-6 py-4 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 transition-all placeholder:text-slate-600"
+                placeholder="Transmit query..."
+                className="flex-grow bg-white/5 border border-white/5 rounded-lg px-4 py-3 text-[11px] text-slate-200 focus:outline-none focus:border-emerald-500/30 transition-all placeholder:text-slate-600"
               />
               <button 
                 type="submit"
                 disabled={chatLoading || !chatInput.trim()}
-                className="px-8 py-4 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-bold text-[10px] tracking-widest uppercase hover:bg-emerald-500/20 disabled:opacity-50 transition-all"
+                className="px-6 py-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg tech-label hover:bg-emerald-500/20 disabled:opacity-50 transition-all"
               >
-                {chatLoading ? 'SENDING...' : 'TRANSMIT'}
+                Send
               </button>
             </form>
           </motion.div>
         ) : activeTab === 'control' ? (
           <motion.div 
             key="control"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
-            <div className="glass-card p-10 flex flex-col justify-between min-h-[300px]">
-              <div className="space-y-1">
-                <span className="serif-header">Hydration Management</span>
-                <h2 className="text-xl font-bold text-slate-100 uppercase tracking-widest">Irrigation Control</h2>
+            <div className="glass-card p-6 flex flex-col justify-between min-h-[250px]">
+              <div className="space-y-0.5">
+                <span className="tech-label opacity-40">Hydration Management</span>
+                <h2 className="text-[10px] font-bold text-slate-100 uppercase tracking-widest">Irrigation Control</h2>
               </div>
-              <div className="py-10 flex justify-center">
-                <div className={`p-8 rounded-full border-2 ${irrigationActive ? 'border-blue-500 bg-blue-500/10 shadow-[0_0_30px_rgba(59,130,246,0.2)]' : 'border-slate-800 bg-slate-900/50'} transition-all duration-500`}>
-                  <Droplets size={48} className={irrigationActive ? 'text-blue-400 animate-bounce' : 'text-slate-700'} />
+              <div className="py-6 flex justify-center">
+                <div className={`p-6 rounded-full border ${irrigationActive ? 'border-blue-500/50 bg-blue-500/10 shadow-[0_0_20px_rgba(59,130,246,0.1)]' : 'border-white/5 bg-white/2'} transition-all duration-500`}>
+                  <Droplets size={32} className={irrigationActive ? 'text-blue-400 animate-pulse' : 'text-slate-700'} />
                 </div>
               </div>
               <button 
                 onClick={() => setIrrigationActive(!irrigationActive)}
-                className={`w-full py-4 rounded-xl font-bold tracking-[0.2em] text-[10px] uppercase transition-all ${irrigationActive ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500/20'}`}
+                className={`w-full py-3 rounded-lg tech-label transition-all ${irrigationActive ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20'}`}
               >
-                {irrigationActive ? 'TERMINATE IRRIGATION' : 'INITIATE IRRIGATION'}
+                {irrigationActive ? 'Terminate' : 'Initiate'}
               </button>
             </div>
-            <div className="glass-card p-10 flex flex-col justify-between min-h-[300px]">
-              <div className="space-y-1">
-                <span className="serif-header">Nutrient Injection</span>
-                <h2 className="text-xl font-bold text-slate-100 uppercase tracking-widest">Dosing System</h2>
+            <div className="glass-card p-6 flex flex-col justify-between min-h-[250px]">
+              <div className="space-y-0.5">
+                <span className="tech-label opacity-40">Nutrient Injection</span>
+                <h2 className="text-[10px] font-bold text-slate-100 uppercase tracking-widest">Dosing System</h2>
               </div>
-              <div className="py-10 flex justify-center">
-                <div className={`p-8 rounded-full border-2 ${fertilizerActive ? 'border-amber-500 bg-amber-500/10 shadow-[0_0_30px_rgba(245,158,11,0.2)]' : 'border-slate-800 bg-slate-900/50'} transition-all duration-500`}>
-                  <Zap size={48} className={fertilizerActive ? 'text-amber-400 animate-pulse' : 'text-slate-700'} />
+              <div className="py-6 flex justify-center">
+                <div className={`p-6 rounded-full border ${fertilizerActive ? 'border-amber-500/50 bg-amber-500/10 shadow-[0_0_20px_rgba(245,158,11,0.1)]' : 'border-white/5 bg-white/2'} transition-all duration-500`}>
+                  <Zap size={32} className={fertilizerActive ? 'text-amber-400 animate-pulse' : 'text-slate-700'} />
                 </div>
               </div>
               <button 
                 onClick={() => setFertilizerActive(!fertilizerActive)}
-                className={`w-full py-4 rounded-xl font-bold tracking-[0.2em] text-[10px] uppercase transition-all ${fertilizerActive ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20'}`}
+                className={`w-full py-3 rounded-lg tech-label transition-all ${fertilizerActive ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20'}`}
               >
-                {fertilizerActive ? 'TERMINATE DOSING' : 'INITIATE DOSING'}
+                {fertilizerActive ? 'Terminate' : 'Initiate'}
               </button>
             </div>
           </motion.div>
         ) : activeTab === 'logbook' ? (
           <motion.div 
             key="logbook"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-8"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="space-y-6"
           >
-            <div className="glass-card p-10">
-              <div className="flex flex-col gap-1 mb-8">
-                <span className="serif-header">Field Observations</span>
-                <h2 className="text-xl font-bold text-slate-100 uppercase tracking-widest">Tactical Logbook</h2>
+            <div className="glass-card p-6">
+              <div className="space-y-0.5 mb-6">
+                <span className="tech-label opacity-40">Field Observations</span>
+                <h2 className="text-[10px] font-bold text-slate-100 uppercase tracking-widest">Tactical Logbook</h2>
               </div>
-              <form onSubmit={handleAddLog} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <form onSubmit={handleAddLog} className="space-y-4">
+                <div className="grid grid-cols-3 gap-3">
                   {(['observation', 'action', 'alert'] as const).map((type) => (
                     <button
                       key={type}
                       type="button"
                       onClick={() => setLogType(type)}
-                      className={`py-3 rounded-xl font-bold text-[10px] tracking-widest uppercase border transition-all ${logType === type ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-700'}`}
+                      className={`py-2 rounded-lg tech-label border transition-all ${logType === type ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/2 border-white/5 text-slate-500 hover:border-white/10'}`}
                     >
                       {type}
                     </button>
@@ -1335,42 +1285,41 @@ export default function App() {
                 <textarea 
                   value={newLog}
                   onChange={(e) => setNewLog(e.target.value)}
-                  placeholder="Enter tactical observation details..."
-                  className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-6 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 min-h-[150px] transition-all"
+                  placeholder="Enter observation details..."
+                  className="w-full bg-black/20 border border-white/5 rounded-xl p-4 text-[11px] text-slate-200 focus:outline-none focus:border-emerald-500/30 min-h-[100px] transition-all"
                 />
                 <button 
                   type="submit"
-                  className="w-full py-4 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-bold text-[10px] tracking-widest uppercase hover:bg-emerald-500/20 transition-all"
+                  disabled={!newLog.trim()}
+                  className="w-full py-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg tech-label hover:bg-emerald-500/20 disabled:opacity-50 transition-all"
                 >
-                  COMMIT TO LOGBOOK
+                  Commit Entry
                 </button>
               </form>
             </div>
-            
-            <div className="space-y-4">
+
+            <div className="space-y-3">
               {logs.map((log, i) => (
                 <motion.div 
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.05 }}
                   key={log.id || i} 
-                  className="glass-card p-6 flex items-start gap-6 group"
+                  className="glass-card p-4 flex items-start gap-4"
                 >
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-px h-6 bg-slate-800" />
-                    <div className={`p-3 rounded-xl ${log.type === 'alert' ? 'bg-rose-500/10 text-rose-500' : log.type === 'action' ? 'bg-blue-500/10 text-blue-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
-                      {log.type === 'alert' ? <AlertTriangle size={18} /> : log.type === 'action' ? <Zap size={18} /> : <FileText size={18} />}
-                    </div>
-                    <div className="w-px h-full bg-slate-800" />
+                  <div className={`mt-1 p-1.5 rounded-lg border ${
+                    log.type === 'alert' ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' :
+                    log.type === 'action' ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' :
+                    'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                  }`}>
+                    {log.type === 'alert' ? <AlertTriangle size={12} /> : log.type === 'action' ? <Zap size={12} /> : <FileText size={12} />}
                   </div>
-                  <div className="flex-grow py-2">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="tech-label text-[8px]">{log.timestamp ? new Date(log.timestamp).toLocaleString() : '---'}</span>
-                      <span className={`text-[8px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${log.type === 'alert' ? 'border-rose-500/30 text-rose-500' : 'border-slate-800 text-slate-500'}`}>
-                        {log.type}
-                      </span>
+                  <div className="flex-grow space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{log.type}</span>
+                      <span className="text-[8px] font-mono text-slate-600">{log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '---'}</span>
                     </div>
-                    <p className="text-slate-300 text-sm leading-relaxed">{log.content}</p>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">{log.content}</p>
                   </div>
                 </motion.div>
               ))}
