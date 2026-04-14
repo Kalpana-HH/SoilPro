@@ -1,0 +1,5 @@
+{
+  "name": "SoilGuard Pro",
+  "description": "Advanced soil nutrient monitoring and AI intelligence dashboard.",
+  "requestFramePermissions": ["geolocation"]
+}
